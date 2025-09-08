@@ -1,103 +1,140 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+
+// Type for each sparkle
+interface Sparkle {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  delay: number;
+  duration: number;
+}
+
+function SparklesBackground() {
+  const [sparkles, setSparkles] = useState<Sparkle[]>([]);
+
+  useEffect(() => {
+    const stars: Sparkle[] = Array.from({ length: 25 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 100, // percentage across screen
+      y: Math.random() * 100,
+      size: Math.random() * 4 + 2, // 2px – 6px
+      delay: Math.random() * 5, // staggered animation
+      duration: Math.random() * 10 + 5, // 5s–15s
+    }));
+    setSparkles(stars);
+  }, []);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {sparkles.map((star) => (
+        <motion.div
+          key={star.id}
+          initial={{ opacity: 0, y: 0 }}
+          animate={{
+            opacity: [0, 1, 0],
+            y: [0, -30], // float upward
+          }}
+          transition={{
+            duration: star.duration,
+            delay: star.delay,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="rounded-full bg-purple-300 shadow-[0_0_10px_#a78bfa]"
+          style={{
+            width: star.size,
+            height: star.size,
+            position: "absolute",
+            left: `${star.x}%`,
+            top: `${star.y}%`,
+          }}
         />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      ))}
     </div>
   );
 }
+
+export default function Home() {
+  const [question, setQuestion] = useState<string>("");
+  const [fortune, setFortune] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const askFortune = async () => {
+    if (!question) return;
+    setLoading(true);
+    setFortune("");
+
+    try {
+      const res = await fetch("/api/fortune", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+
+      type FortuneResponse = { fortune?: string };
+      const data: FortuneResponse = await res.json();
+      setFortune(data.fortune || "The spirits are silent...");
+    } catch (err) {
+      console.error(err);
+      setFortune("Something went wrong while consulting the spirits.");
+    }
+
+    setLoading(false);
+  };
+
+  return (
+    <main className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-indigo-900 via-purple-900 to-black text-white font-serif overflow-hidden">
+      <SparklesBackground />
+
+      <h1 className="text-4xl font-bold mb-6 mt-10 text-purple-300 tracking-widest drop-shadow-lg relative z-10">
+        Ask The Oracle
+      </h1>
+
+      {/* Crystal Ball */}
+      <motion.div
+        animate={{
+          scale: loading ? [1, 1.1, 1] : 1,
+          boxShadow: loading
+            ? ["0 0 20px #a78bfa", "0 0 40px #c084fc", "0 0 20px #a78bfa"]
+            : "0 0 20px #6d28d9",
+        }}
+        transition={{ duration: 2, repeat: Infinity }}
+        className="w-40 h-40 rounded-full bg-gradient-to-b from-purple-500 to-indigo-700 flex items-center justify-center mb-6 relative z-10"
+      >
+        <span className="text-xl opacity-80"></span>
+      </motion.div>
+
+      <input
+        type="text"
+        placeholder="Ask your question..."
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        className="w-72 p-3 mb-4 rounded-lg bg-black/40 border border-purple-400 text-purple-100 placeholder-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-lg relative z-10"
+      />
+
+      <button
+        onClick={askFortune}
+        disabled={!question || loading}
+        className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-lg font-semibold tracking-wider shadow-[0_0_15px_#a855f7] hover:shadow-[0_0_25px_#c084fc] transition-all relative z-10"
+      >
+        {loading ? "Consulting the spirits..." : "Reveal Fortune"}
+      </button>
+
+      {fortune && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1 }}
+          className="fortune-box mb-6 mt-8 p-6 rounded-2xl border border-purple-500 bg-black/60 shadow-[0_0_30px_#9333ea] max-w-md text-center relative z-10"
+        >
+          <p className="text-xl text-purple-200 italic">{fortune}</p>
+        </motion.div>
+      )}
+    </main>
+  );
+}
+
