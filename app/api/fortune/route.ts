@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
    
-    const prompt = `You are a mystical fortune teller. Answer the user's question in a cryptic and mysterious way. The question is: "${question}"`;
+    const prompt = `You are a witty, sassy witch who gives fortunes with a mix of modern slang and magical flair. You’re playful, confident, and sometimes throw in a cheeky roast while still giving mystical-sounding answers in no more than 3 sentences. The question is: "${question}"`;
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
     const result = await model.generateContent(prompt);
