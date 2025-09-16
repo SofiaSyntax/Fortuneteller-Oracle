@@ -27,31 +27,27 @@ A magical web app built with **Next.js 15**, **React 19**, **TypeScript**, **Tai
 
 ---
 
-
 ## 🚀 Getting Started
 
 ### 1. Clone the repository
-```bash
 git clone https://github.com/YOUR-USERNAME/fortune-teller.git
 cd fortune-teller
-
 
 ### 2. Install dependencies
 npm install
 # or
 yarn install
 
-
 ### 3. Set up Gemini API
-Createa a .env file in the root of your project and add your Gemini API key:
+Create a .env file in the root of your project and add your Gemini API key:
 GEMINI_API_KEY=your_api_key_here
 You can get an API key from Google AI Studio
 
-### 4. Run the development server
+### 4. Run the development server 
 npm run dev
-Then open http://localhost:3000 in your browser
+Then open http://localhost:3000 in your browser.
 
-📂 ##Project Structure
+## 📂 Project Structure
 /app
   ├── page.tsx               # Main page (fortune teller UI)
   ├── api/fortune            # API endpoint that calls Gemini
@@ -61,11 +57,6 @@ Then open http://localhost:3000 in your browser
 /public
   └── music/whimsical.mp3    # Background mystical music
 
-##🎵 Music
-The mystical background track is sourced from Free Music Archive. 
+## 🎵 Music
+The mystical background track is sourced from Free Music Archive.
 You can replace /public/music/whimsical.mp3 with any other royalty-free track of your choice.
-
-
-npm run dev
-Then open http://localhost:3000
- in your browser.
